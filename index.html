@@ -1,0 +1,135 @@
+<!-- Structure inspired by SAMORA BOT @ https://www.youtube.com/watch?v=QExydkuuE30&t=358s -->
+
+<!-- This Section of code uses custom CSS and Javascript code not found in the original, visuals and outcomes may differ-->
+<!-- initial official stuffs -->
+<!DOCTYPE html>
+<html lang="en-gb">
+<head>
+  <title>SQL Database</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width">
+  <link rel="stylesheet" type="text/css" href="style.css"/>
+</head>
+<body style="margin:30px">
+  <div class="container">
+    <div class="row">
+      <!-- Stops any input from being the filler data in each field (anything blank gets the nono-treatment) -->
+      <form onsubmit="event.preventDefault();">
+        <fieldset>
+          <legend>Name</legend>
+          <input type="text" class="form-control" name="item" id="item">
+
+          <legend>Quantity</legend>
+          <input type="number" name="quantity" class="form-control" id="quantity">
+
+          <br>
+
+          <button type="button" class="btn btn-success" onclick="add_record()">Insert</button>
+          <button type="button" class="btn btn-success" onclick="view_record()">Refresh Records</button>
+          <button type="button" class="btn btn-evil" onclick="clear_record_all()">Delete Records</button>
+
+        </fieldset>
+      </form>
+
+      <hr>
+      <h4>Record Table</h4>
+      <div id="tableContainer"></div>
+    </div>
+  </div>
+  <script>
+  // Use localStorage cus i dont know anything else :( )
+  function add_record() {
+    var name_value = document.getElementById("item").value.trim();
+    var quantity_value = document.getElementById("quantity").value.trim();
+    // false if left empty - since any unadded aguments is false
+    if (!name_value || !quantity_value) {
+      alert("Please fill in both fields");
+      return;
+    }
+
+    // verification check
+    quantity_value = parseInt(quantity_value, 10);
+    if (isNaN(quantity_value) || quantity_value <= 0) {
+      alert("Quantity must be a positive number");
+      return;
+    }
+
+    // get the data in the local storage or make one for the current session and keep it
+    let existingData = [];
+    try {
+      existingData = JSON.parse(localStorage.getItem("inventoryData")) || [];
+    } catch (e) {
+      existingData = [];
+    }
+
+    // add item to perm data list
+    let newItem = { name: name_value, quantity: quantity_value };
+    existingData.push(newItem);
+
+    // saves perm data to local storage
+    localStorage.setItem("inventoryData", JSON.stringify(existingData));
+
+    // empty fileds to stop spam inputs
+    document.getElementById("item").value = "";
+    document.getElementById("quantity").value = "";
+
+    const get = async function () {
+      const data = {existingData}
+    }
+  }
+
+    // function to  refresh records
+  function view_record() {
+    let data = [];
+    try {
+      data = JSON.parse(localStorage.getItem("inventoryData")) || [];
+    } catch (error) {
+      console.error("Error loading data:", error);
+      data = [];
+    }
+
+    displayTable(data);
+  }
+
+
+// reads data and updates current table with new colomns
+    
+  function displayTable(data) {
+    let tableHTML = '<table class="table-border table-hover">';
+    tableHTML += '<tr><th>Name</th><th>Quantity</th></tr>';
+
+    if (data.length === 0) {
+      tableHTML += '<tr><td colspan="2">No records found</td></tr>';
+    } else {
+      data.forEach(item => {
+        tableHTML += `<tr><td>${item.name}</td><td>${item.quantity}</td></tr>`;
+      });
+    }
+
+    tableHTML += '</table>';
+    document.getElementById("tableContainer").innerHTML = tableHTML;
+  }
+// only removes LOCAL STORAGE not everything in the JSON file
+  function clear_record_all() {
+    if (window.prompt("To delete all records, enter the ADMINISTRATIVE KEY?") == "EvilKitty_BG") {
+      localStorage.removeItem("inventoryData");
+      view_record();
+    } else {
+      window.alert("Invalid key")
+    }
+  }
+
+  // loads page and local storage on new session
+  window.onload = function() {
+    const fieldset = document.querySelector('form fieldset');
+
+    // auto-load data
+    view_record();
+
+
+};
+
+</script>
+
+</body>
+</html>
